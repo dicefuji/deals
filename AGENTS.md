@@ -14,6 +14,7 @@ Keep modules focused by behavior. Put ranking rules in `src/lib/`, platform-spec
 ## Build, Test, and Development Commands
 The repository uses npm scripts.
 - `npm install` installs dependencies, including Playwright for live browser collection
+- `npx playwright install chromium` downloads the local browser binary required for Playwright
 - `npm start` starts the local app on `http://localhost:3000`
 - `npm run dev` restarts the server on file changes
 - `npm test` runs the Node test suite

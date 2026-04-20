@@ -6,6 +6,7 @@ Local-first deal finder for food-delivery apps. The app compares DoorDash and Ub
 
 ```bash
 npm install
+npx playwright install chromium
 npm start
 ```
 
@@ -18,6 +19,7 @@ Use `Mock data` to see the full ranking flow immediately. Switch to `Live browse
 - `npm start`: run the local server
 - `npm run dev`: run the server with watch mode
 - `npm test`: execute unit tests with the built-in Node test runner
+- `npx playwright install chromium`: download the browser used by live collection
 
 ## Project layout
 
@@ -34,3 +36,13 @@ The live collectors are intentionally conservative:
 - they use your local browser session, not stored credentials
 - they rely on visible consumer web pages rather than private APIs
 - they currently extract headline deal text and apply heuristic pricing, so mock mode is more predictable than live mode right now
+
+## Live mode setup
+
+Before using `Live browser collection`, run:
+
+```bash
+npx playwright install chromium
+```
+
+Then start the app, switch to live mode, and sign into DoorDash and Uber Eats in the browser Playwright opens locally.

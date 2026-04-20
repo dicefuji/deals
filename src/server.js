@@ -97,9 +97,14 @@ const server = http.createServer(async (request, response) => {
 
     sendJson(response, 404, { error: "Not found" });
   } catch (error) {
+    const missingBrowser = error.message.includes("Executable doesn't exist");
+    const hint = missingBrowser
+      ? "Playwright is installed, but its browser binary is missing. Run `npx playwright install chromium`, then retry live mode after signing into the local browser."
+      : "Live collection requires Playwright and an authenticated local browser session.";
+
     sendJson(response, 500, {
       error: error.message,
-      hint: "Live collection requires Playwright and an authenticated local browser session."
+      hint
     });
   }
 });
