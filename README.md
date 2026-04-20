@@ -5,8 +5,7 @@ DoorDash-only deal recommender powered by Browser Use Cloud. The app uses a Brow
 ## Quick start
 
 ```bash
-export BROWSER_USE_API_KEY=bu_xxx
-export BROWSER_USE_PROFILE_ID=profile_xxx
+.env
 npm start
 ```
 
@@ -25,7 +24,14 @@ Use `Mock data` to preview the ranking flow immediately. Use `Browser Use live m
 1. Create a Browser Use API key.
 2. Sync a browser profile that is already logged into DoorDash.
 3. Copy the resulting Browser Use `profile_id`.
-4. Export `BROWSER_USE_API_KEY` and `BROWSER_USE_PROFILE_ID` before starting the app.
+4. Create a `.env` file in the repo root:
+
+```env
+BROWSER_USE_API_KEY=bu_xxx
+BROWSER_USE_PROFILE_ID=profile_xxx
+```
+
+5. Start the app with `npm start`.
 
 ## Project layout
 

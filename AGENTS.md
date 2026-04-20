@@ -18,6 +18,7 @@ The repository uses npm scripts.
 - `npm test` runs the Node test suite
 
 Live mode also requires `BROWSER_USE_API_KEY` and `BROWSER_USE_PROFILE_ID` in the environment. Document any new setup requirements in `README.md`.
+Prefer repo-root `.env` configuration for local development.
 
 ## Coding Style & Naming Conventions
 Use clear, descriptive names and keep file naming consistent.
