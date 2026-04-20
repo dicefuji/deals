@@ -1,0 +1,15 @@
+{
+  "name": "deals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first food delivery deal finder for DoorDash and Uber Eats.",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "playwright": "^1.54.2"
+  }
+}
