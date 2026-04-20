@@ -53,6 +53,32 @@ function render(response) {
   `;
 }
 
+function renderDebug(debug) {
+  if (!debug) {
+    return "";
+  }
+
+  const lastSteps = Array.isArray(debug.lastSteps) && debug.lastSteps.length > 0
+    ? debug.lastSteps.map((step) => `
+        <article class="card">
+          <p class="card-title">Step ${step.number}</p>
+          <p>${step.nextGoal || "No next goal recorded"}</p>
+          <p class="muted">${step.url || "No URL recorded"}</p>
+          <p class="muted">${(step.actions || []).join(" • ") || "No actions recorded"}</p>
+        </article>
+      `).join("")
+    : `<p class="muted">No recent steps were available.</p>`;
+
+  return `
+    <section class="panel">
+      <h3>Debug details</h3>
+      <p class="muted">Task: ${debug.taskId || "unknown"}${debug.liveUrl ? ` • <a href="${debug.liveUrl}" target="_blank" rel="noreferrer">Watch live session</a>` : ""}</p>
+      <p class="muted">Status: ${debug.status || "unknown"}${debug.logDownloadUrl ? ` • <a href="${debug.logDownloadUrl}" target="_blank" rel="noreferrer">Download logs</a>` : ""}</p>
+      <div class="cards">${lastSteps}</div>
+    </section>
+  `;
+}
+
 async function loadSetupStatus() {
   const response = await fetch("/api/health");
   const data = await response.json();
@@ -76,7 +102,13 @@ async function loadRecommendations(payload) {
   const data = await response.json();
 
   if (!response.ok) {
-    results.innerHTML = `<section class="panel"><p>${data.error}</p><p class="muted">${data.hint || ""}</p></section>`;
+    results.innerHTML = `
+      <section class="panel">
+        <p>${data.error}</p>
+        <p class="muted">${data.hint || ""}</p>
+      </section>
+      ${renderDebug(data.debug)}
+    `;
     return;
   }
 

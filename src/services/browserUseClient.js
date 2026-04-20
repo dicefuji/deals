@@ -2,6 +2,7 @@ const BROWSER_USE_API_BASE = "https://api.browser-use.com/api/v2";
 const DEFAULT_MODEL = process.env.BROWSER_USE_MODEL || "browser-use-2.0";
 const DEFAULT_TIMEOUT_MS = 120000;
 const POLL_INTERVAL_MS = 2500;
+const DEBUG_HISTORY_LIMIT = 5;
 
 const structuredOutputSchema = {
   type: "object",
@@ -125,6 +126,51 @@ function parseTaskOutput(output) {
   }
 }
 
+async function getTaskDiagnostics(taskId, sessionId) {
+  const [task, session, logs] = await Promise.all([
+    browserUseFetch(`/tasks/${taskId}`, { method: "GET" }).catch(() => null),
+    sessionId ? browserUseFetch(`/sessions/${sessionId}`, { method: "GET" }).catch(() => null) : Promise.resolve(null),
+    browserUseFetch(`/tasks/${taskId}/logs`, { method: "GET" }).catch(() => null)
+  ]);
+
+  return {
+    task,
+    session,
+    logs
+  };
+}
+
+function summarizeTaskSteps(task) {
+  if (!task?.steps?.length) {
+    return [];
+  }
+
+  return task.steps.slice(-DEBUG_HISTORY_LIMIT).map((step) => ({
+    number: step.number,
+    url: step.url || null,
+    nextGoal: step.nextGoal || null,
+    evaluationPreviousGoal: step.evaluationPreviousGoal || null,
+    actions: Array.isArray(step.actions) ? step.actions : []
+  }));
+}
+
+function createDebugContext(task, session, logs) {
+  return {
+    taskId: task?.id || null,
+    sessionId: task?.sessionId || session?.id || null,
+    status: task?.status || null,
+    liveUrl: session?.liveUrl || null,
+    logDownloadUrl: logs?.downloadUrl || null,
+    lastSteps: summarizeTaskSteps(task),
+    output: task?.output || null
+  };
+}
+
+function attachDebugContext(error, debug) {
+  error.debug = debug;
+  return error;
+}
+
 export async function runDoorDashDealTask(userInput) {
   const task = await browserUseFetch("/tasks", {
     method: "POST",
@@ -153,24 +199,30 @@ export async function runDoorDashDealTask(userInput) {
     });
 
     if (currentTask.status === "finished") {
-      const session = await browserUseFetch(`/sessions/${currentTask.sessionId}`, {
-        method: "GET"
-      });
+      const diagnostics = await getTaskDiagnostics(currentTask.id, currentTask.sessionId);
 
       return {
         taskId: currentTask.id,
         sessionId: currentTask.sessionId,
-        liveUrl: session?.liveUrl || null,
+        liveUrl: diagnostics.session?.liveUrl || null,
         structured: parseTaskOutput(currentTask.output)
       };
     }
 
     if (currentTask.status === "failed" || currentTask.status === "stopped") {
-      throw new Error(currentTask.output || `Browser Use task ${currentTask.status}.`);
+      const diagnostics = await getTaskDiagnostics(currentTask.id, currentTask.sessionId);
+      throw attachDebugContext(
+        new Error(currentTask.output || `Browser Use task ${currentTask.status}.`),
+        createDebugContext(diagnostics.task, diagnostics.session, diagnostics.logs)
+      );
     }
 
     await sleep(POLL_INTERVAL_MS);
   }
 
-  throw new Error("Browser Use task timed out before returning results.");
+  const diagnostics = await getTaskDiagnostics(task.id, task.sessionId);
+  throw attachDebugContext(
+    new Error("Browser Use task timed out before returning results."),
+    createDebugContext(diagnostics.task, diagnostics.session, diagnostics.logs)
+  );
 }

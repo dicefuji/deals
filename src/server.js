@@ -95,7 +95,8 @@ const server = http.createServer(async (request, response) => {
 
     sendJson(response, 500, {
       error: error.message,
-      hint
+      hint,
+      debug: error.debug || null
     });
   }
 });
