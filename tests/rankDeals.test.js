@@ -32,7 +32,7 @@ test("ranking prefers BOGO when totals are otherwise close", () => {
       promotion: { type: "bogo", label: "Buy 1 Get 1" }
     }),
     normalizeDeal({
-      platform: "Uber Eats",
+      platform: "DoorDash",
       storeName: "Percent Shop",
       cuisine: "Asian",
       rating: 4.6,
@@ -60,7 +60,7 @@ test("budget overruns reduce score", () => {
     promotion: { type: "free_delivery", label: "Free delivery" }
   });
   const expensiveDeal = normalizeDeal({
-    platform: "Uber Eats",
+    platform: "DoorDash",
     storeName: "Expensive",
     rating: 4.5,
     etaMinutes: 25,

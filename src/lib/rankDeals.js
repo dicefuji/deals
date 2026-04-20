@@ -55,6 +55,11 @@ export function explainDeal(deal, preferences = {}) {
 
   reasons.push(`estimated total is $${deal.total.toFixed(2)}`);
   reasons.push(`estimated savings is $${deal.savings.amount.toFixed(2)} (${deal.savings.percent}%)`);
+  reasons.push(`fees add $${deal.fees.toFixed(2)}`);
+
+  if (deal.isDashPassRequired) {
+    reasons.push("promo appears to require DashPass");
+  }
 
   if (preferences.maxEtaMinutes) {
     reasons.push(`ETA is ${deal.etaMinutes} min`);

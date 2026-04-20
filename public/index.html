@@ -9,10 +9,19 @@
   <body>
     <main class="page">
       <section class="hero">
-        <p class="eyebrow">Local-first recommender</p>
-        <h1>Pick the best food-delivery deal without checking both apps yourself.</h1>
+        <p class="eyebrow">DoorDash via Browser Use</p>
+        <h1>Let a synced browser profile find the best DoorDash deal for you.</h1>
         <p class="lede">
-          Compare DoorDash and Uber Eats, rank BOGO and other promos by real value, and get one recommendation with a short explanation.
+          Bring your Browser Use API key and profile ID, let the agent inspect your authenticated DoorDash session, and get one recommendation without brittle scraping.
+        </p>
+      </section>
+
+      <section class="panel setup">
+        <h2>Setup</h2>
+        <p id="setup-status" class="muted">Checking Browser Use configuration...</p>
+        <p class="muted">
+          Required environment variables: <code>BROWSER_USE_API_KEY</code> and <code>BROWSER_USE_PROFILE_ID</code>.
+          The synced profile should already be logged into DoorDash.
         </p>
       </section>
 
@@ -21,20 +30,6 @@
           <label>
             Meal intent
             <input name="query" type="text" value="Dinner" />
-          </label>
-          <label>
-            Address
-            <input name="address" type="text" value="San Francisco, CA" />
-          </label>
-          <label>
-            Cuisine
-            <select name="cuisine">
-              <option>Any</option>
-              <option>Asian</option>
-              <option>American</option>
-              <option>Italian</option>
-              <option>Mexican</option>
-            </select>
           </label>
           <label>
             Budget
@@ -49,10 +44,10 @@
             Prefer BOGO first
           </label>
           <label>
-            Data mode
+            Run mode
             <select name="mode">
+              <option value="live">Browser Use live mode</option>
               <option value="mock">Mock data</option>
-              <option value="live">Live browser collection</option>
             </select>
           </label>
           <button type="submit">Find my best deal</button>

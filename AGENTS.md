@@ -1,44 +1,42 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository now contains a local Node.js app for comparing DoorDash and Uber Eats deals.
+This repository contains a local Node.js app for recommending DoorDash deals through Browser Use Cloud.
 - `src/server.js` runs the local HTTP server and API routes
-- `src/collectors/` holds per-platform browser collectors
+- `src/services/` contains Browser Use orchestration and recommendation assembly
 - `src/lib/` contains normalization and ranking logic
-- `src/data/` contains mock data used for demo mode
+- `src/data/` contains mock data for demo mode
 - `public/` contains the browser UI
 - `tests/` contains automated tests
 
-Keep modules focused by behavior. Put ranking rules in `src/lib/`, platform-specific extraction in `src/collectors/`, and avoid mixing UI logic into server code.
+Keep modules focused by behavior. Put ranking rules in `src/lib/`, Browser Use prompts and polling in `src/services/`, and avoid mixing UI logic into server code.
 
 ## Build, Test, and Development Commands
 The repository uses npm scripts.
-- `npm install` installs dependencies, including Playwright for live browser collection
-- `npx playwright install chromium` downloads the local browser binary required for Playwright
 - `npm start` starts the local app on `http://localhost:3000`
 - `npm run dev` restarts the server on file changes
 - `npm test` runs the Node test suite
 
-Do not add new commands without documenting them in `README.md`.
+Live mode also requires `BROWSER_USE_API_KEY` and `BROWSER_USE_PROFILE_ID` in the environment. Document any new setup requirements in `README.md`.
 
 ## Coding Style & Naming Conventions
-Use clear, descriptive names and keep file naming consistent within the language you introduce.
+Use clear, descriptive names and keep file naming consistent.
 - JavaScript modules: camelCase exports, lowercase file names such as `rankDeals.js`
-- Directories: lowercase, plural where they group similar modules such as `collectors/`
-- Markdown files: short uppercase names only when conventional, such as `README.md` and `AGENTS.md`
+- Directories: lowercase, plural where they group similar modules such as `services/`
+- Markdown files: conventional uppercase names such as `README.md` and `AGENTS.md`
 
-Use ES modules, 2-space indentation, and keep browser-automation selectors isolated to collector files.
+Use ES modules, 2-space indentation, and keep Browser Use prompts/schema definitions isolated to service files.
 
 ## Testing Guidelines
 Tests use the built-in Node test runner.
 - place tests under `tests/`
 - use `*.test.js` naming
-- cover ranking behavior, deal normalization, and collector fallbacks
+- cover ranking behavior, deal normalization, and Browser Use response mapping/fallbacks
 
 When changing score logic, add or update tests for promo priority, fee effects, budget penalties, and ETA penalties.
 
 ## Commit & Pull Request Guidelines
-Git history currently uses short imperative subjects such as `Initial commit`. Follow that pattern:
+Git history uses short imperative subjects. Follow that pattern:
 - keep the subject line brief
 - start with a verb
 - avoid mixing unrelated changes in one commit
@@ -52,15 +50,27 @@ Pull requests should include:
 - screenshots only when UI or rendered output changes
 
 ## Documentation Expectations
-Documentation remains part of the implementation. Update `README.md` and this guide whenever you add commands, new directories, platform support, or meaningful workflow changes.
+Documentation is part of the implementation. Update `README.md` and this guide whenever you add commands, directories, platform support, or workflow changes.
 
 ## Agent Workflow Expectations
-Treat `AGENTS.md` as a living contributor guide rather than a one-time file.
+Treat `AGENTS.md` as a living contributor guide.
 - refresh it frequently as the repository evolves
 - update it after meaningful commits when workflow or structure changes
 - keep instructions aligned with the current repo state, not planned future state
 
 Contributors should work the way a senior engineer would on an active repository:
-- commit frequently with helpful, specific messages such as `Add AGENTS contributor guide` or `Document test command in README`
+- commit frequently with helpful, specific messages
 - push changes to GitHub frequently instead of letting local work drift
 - prefer incremental, traceable history over large catch-all commits
+
+## Browser Use Notes
+The repo intentionally uses Browser Use Cloud as the browser/session layer instead of local scraping.
+- users bring their own `BROWSER_USE_API_KEY` and `BROWSER_USE_PROFILE_ID`
+- the synced profile should already be authenticated with DoorDash
+- the app is recommendation-only and should not add items to cart or place orders unless the repository direction changes explicitly
+
+Keep the Browser Use prompt narrow:
+- DoorDash only
+- restaurant/prepared-food deals only
+- no grocery or retail noise
+- no checkout/cart actions

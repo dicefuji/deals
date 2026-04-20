@@ -3,8 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { collectDeals } from "./services/collectDeals.js";
-import { rankDeals } from "./lib/rankDeals.js";
+import { getRecommendations } from "./services/getRecommendations.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,11 +11,9 @@ const publicDir = path.join(__dirname, "..", "public");
 
 const demoRequest = {
   query: "Dinner",
-  address: "San Francisco, CA",
   budget: 35,
   maxEtaMinutes: 45,
-  prioritizeBogo: true,
-  cuisine: "Any"
+  prioritizeBogo: true
 };
 
 function sendJson(response, statusCode, payload) {
@@ -62,30 +59,23 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, "http://localhost");
 
     if (request.method === "GET" && url.pathname === "/api/health") {
-      sendJson(response, 200, { ok: true });
+      sendJson(response, 200, {
+        ok: true,
+        browserUseConfigured: Boolean(process.env.BROWSER_USE_API_KEY && process.env.BROWSER_USE_PROFILE_ID),
+        model: process.env.BROWSER_USE_MODEL || "browser-use-2.0"
+      });
       return;
     }
 
     if (request.method === "GET" && url.pathname === "/api/demo") {
-      const deals = await collectDeals({ mode: "mock", userInput: demoRequest });
-      sendJson(response, 200, {
-        request: demoRequest,
-        deals,
-        ranking: rankDeals(deals, demoRequest)
-      });
+      sendJson(response, 200, await getRecommendations({ ...demoRequest, mode: "mock" }));
       return;
     }
 
     if (request.method === "POST" && url.pathname === "/api/recommendations") {
       const userInput = await parseBody(request);
-      const mode = userInput.mode === "live" ? "live" : "mock";
-      const deals = await collectDeals({ mode, userInput });
-
-      sendJson(response, 200, {
-        request: userInput,
-        deals,
-        ranking: rankDeals(deals, userInput)
-      });
+      const mode = userInput.mode === "mock" ? "mock" : "live";
+      sendJson(response, 200, await getRecommendations({ ...userInput, mode }));
       return;
     }
 
@@ -97,10 +87,10 @@ const server = http.createServer(async (request, response) => {
 
     sendJson(response, 404, { error: "Not found" });
   } catch (error) {
-    const missingBrowser = error.message.includes("Executable doesn't exist");
-    const hint = missingBrowser
-      ? "Playwright is installed, but its browser binary is missing. Run `npx playwright install chromium`, then retry live mode after signing into the local browser."
-      : "Live collection requires Playwright and an authenticated local browser session.";
+    const missingConfig = error.message.includes("Missing required environment variable");
+    const hint = missingConfig
+      ? "Set `BROWSER_USE_API_KEY` and `BROWSER_USE_PROFILE_ID` before starting the app, then retry live mode."
+      : "Live mode now uses Browser Use Cloud with a synced DoorDash profile.";
 
     sendJson(response, 500, {
       error: error.message,
